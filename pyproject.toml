@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "strain-scan"
+version = "0.1.0"
+description = "CLI tool to generate strained POSCAR files from VASP POSCAR input"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+]
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+maintainers = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+keywords = ["VASP", "POSCAR", "strain", "materials science"]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/strain-scan"
+Repository = "https://github.com/yourusername/strain-scan"
+Issues = "https://github.com/yourusername/strain-scan/issues"
+
+[project.scripts]
+strain-scan = "strain_scan:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["strain_scan*"]
+
+[tool.pixi.workspace]
+preview = ["pixi-build"]
+channels = ["https://prefix.dev/pixi-build-backends", "conda-forge"]
+
+[tool.pixi.package]
+name = "strain-scan"
+version = "0.1.0"
+build = {backend = {name = "pixi-build-python", version = "==0.4.0"}}
+
+[tool.pixi.package.host-dependencies]
+setuptools = "*"
+
+[tool.pixi.package.run-dependencies]
+numpy = "*"
+
+
+
