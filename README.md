@@ -10,7 +10,7 @@ The tool is packaged as a conda package using Pixi's build backends.
 
 2. Clone the repository and build the conda package:
 ```bash
-git clone <repo>
+git clone https://github.com/TraceBivens/strain-scan.git
 cd strain-scan
 pixi build
 ```
@@ -22,7 +22,7 @@ pixi global install --path ./strain-scan-0.1.0-pyh4616a5c_0.conda
 
 This installs the `strain-scan` command globally.
 
-Requires Python 3.8+ and numpy.
+Requires Python 3.8+, numpy, py4vasp, and matplotlib.
 
 ## Usage
 
@@ -39,6 +39,8 @@ strain-scan POSCAR [options]
 - `--strain-type {volumetric,uniaxial-x,uniaxial-y,uniaxial-z,biaxial}`: Type of strain (default: volumetric)
 - `--output-dir PATH`: Output directory (default: strained)
 - `--prefix STR`: Filename prefix (default: POSCAR_strain_)
+- `--plot`: Plot final energies from VASP runs in subdirectories
+- `--plot-file PATH`: Output file for the energy plot (default: energy_vs_strain.png)
 
 ### Strain Types
 
@@ -66,6 +68,14 @@ Uniaxial strain along z:
 strain-scan POSCAR --strain-type uniaxial-z --min-strain 0.0 --max-strain 0.1 --steps 6
 ```
 
+Plot energy vs strain from VASP calculations:
+
+```bash
+strain-scan POSCAR --plot --output-dir vasp_runs
+```
+
+This reads `vasprun.xml` files in subdirectories and generates `energy_vs_strain.png`.
+
 ## Output
 
 Files are named as `POSCAR_strain_001.poscar`, `POSCAR_strain_002.poscar`, etc., in the specified output directory.
@@ -74,8 +84,10 @@ Each file includes the strain value in the comment line.
 
 ## Requirements
 
-- Python 3.6+
+- Python 3.8+
 - numpy
+- py4vasp
+- matplotlib
 
 ## License
 
