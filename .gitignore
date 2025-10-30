@@ -24,8 +24,7 @@ wheels/
 # Pixi
 .pixi/
 
-# Beads
-.beads/
+# Beads (db files ignored via .beads/.gitignore, jsonl kept)
 
 # Test outputs
 strained/

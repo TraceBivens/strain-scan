@@ -9,6 +9,8 @@ import argparse
 import sys
 from pathlib import Path
 import numpy as np
+import py4vasp as p4v
+import matplotlib.pyplot as plt
 
 
 def parse_poscar(filepath):
@@ -262,6 +264,19 @@ Examples:
         help="Prefix for output filenames (default: POSCAR_strain_)"
     )
 
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Plot final energies from VASP runs in subdirectories"
+    )
+
+    parser.add_argument(
+        "--plot-file",
+        type=Path,
+        default="energy_vs_strain.png",
+        help="Output file for the energy plot (default: energy_vs_strain.png)"
+    )
+
     args = parser.parse_args()
 
     # Validate inputs
@@ -277,20 +292,60 @@ Examples:
     # Create output directory
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Parse input POSCAR
-    structure = parse_poscar(args.poscar_file)
+    if args.plot:
+        # Plotting mode
+        strains = np.linspace(args.min_strain, args.max_strain, args.steps)
+        energies = []
+        valid_strains = []
 
-    # Generate strain values
-    strains = np.linspace(args.min_strain, args.max_strain, args.steps)
+        for i, strain in enumerate(strains):
+            dir_name = f"{args.prefix}{i+1:03d}"
+            vasprun_path = args.output_dir / dir_name / "vasprun.xml"
+            if vasprun_path.exists():
+                try:
+                    calc = p4v.Calculation.from_file(str(vasprun_path))
+                    energy = calc.energy.potential[-1]  # final potential energy
+                    energies.append(energy)
+                    valid_strains.append(strain)
+                    print(f"Read energy from {vasprun_path}: {energy:.6f} eV")
+                except Exception as e:
+                    print(f"Error reading {vasprun_path}: {e}")
+                    energies.append(np.nan)
+                    valid_strains.append(strain)
+            else:
+                print(f"Warning: {vasprun_path} not found")
+                energies.append(np.nan)
+                valid_strains.append(strain)
 
-    # Process each strain
-    for i, strain in enumerate(strains):
-        strained_structure = apply_strain(structure, strain, args.strain_type)
-        output_file = args.output_dir / f"{args.prefix}{i+1:03d}.poscar"
-        write_poscar(strained_structure, output_file)
-        print(f"Generated {output_file} (strain: {strain:.6f})")
+        # Plot
+        if valid_strains:
+            plt.figure(figsize=(8, 6))
+            plt.plot(valid_strains, energies, 'o-', label='Potential Energy')
+            plt.xlabel('Strain')
+            plt.ylabel('Energy (eV)')
+            plt.title('Energy vs Strain')
+            plt.grid(True)
+            plt.legend()
+            plt.savefig(args.plot_file)
+            print(f"\nPlot saved to {args.plot_file}")
+        else:
+            print("No valid vasprun.xml files found for plotting")
+    else:
+        # Generation mode
+        # Parse input POSCAR
+        structure = parse_poscar(args.poscar_file)
 
-    print(f"\nCompleted: {args.steps} strained POSCAR files generated in {args.output_dir}")
+        # Generate strain values
+        strains = np.linspace(args.min_strain, args.max_strain, args.steps)
+
+        # Process each strain
+        for i, strain in enumerate(strains):
+            strained_structure = apply_strain(structure, strain, args.strain_type)
+            output_file = args.output_dir / f"{args.prefix}{i+1:03d}.poscar"
+            write_poscar(strained_structure, output_file)
+            print(f"Generated {output_file} (strain: {strain:.6f})")
+
+        print(f"\nCompleted: {args.steps} strained POSCAR files generated in {args.output_dir}")
 
 
 if __name__ == "__main__":

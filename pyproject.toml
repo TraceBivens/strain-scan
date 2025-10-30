@@ -58,6 +58,8 @@ setuptools = "*"
 
 [tool.pixi.package.run-dependencies]
 numpy = "*"
+py4vasp = "*"
+matplotlib = "*"
 
 
 
