@@ -219,7 +219,8 @@ Examples:
     parser.add_argument(
         "poscar_file",
         type=Path,
-        help="Input POSCAR file"
+        nargs='?',
+        help="Input POSCAR file (required unless --plot)"
     )
 
     parser.add_argument(
@@ -286,7 +287,10 @@ Examples:
     if args.steps < 2:
         parser.error("steps must be at least 2")
 
-    if not args.poscar_file.exists():
+    if not args.plot and not args.poscar_file:
+        parser.error("POSCAR file is required unless --plot is specified")
+
+    if args.poscar_file and not args.poscar_file.exists():
         parser.error(f"POSCAR file '{args.poscar_file}' does not exist")
 
     # Create output directory

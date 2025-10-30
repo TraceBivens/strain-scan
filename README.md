@@ -27,12 +27,12 @@ Requires Python 3.8+, numpy, py4vasp, and matplotlib.
 ## Usage
 
 ```bash
-strain-scan POSCAR [options]
+strain-scan [POSCAR] [options]
 ```
 
 ### Options
 
-- `POSCAR`: Input POSCAR file (required)
+- `POSCAR`: Input POSCAR file (required unless --plot)
 - `--min-strain FLOAT`: Minimum strain value (default: -0.05)
 - `--max-strain FLOAT`: Maximum strain value (default: 0.05)
 - `--steps INT`: Number of strain steps (default: 11)
@@ -71,10 +71,10 @@ strain-scan POSCAR --strain-type uniaxial-z --min-strain 0.0 --max-strain 0.1 --
 Plot energy vs strain from VASP calculations:
 
 ```bash
-strain-scan POSCAR --plot --output-dir vasp_runs
+strain-scan --plot --output-dir vasp_runs
 ```
 
-This reads `vasprun.xml` files in subdirectories and generates `energy_vs_strain.png`.
+This reads `vasprun.xml` files in subdirectories (named with the prefix, e.g., POSCAR_strain_001, etc.) and generates `energy_vs_strain.png`.
 
 ## Output
 
