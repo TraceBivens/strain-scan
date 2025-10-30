@@ -74,7 +74,7 @@ Plot energy vs strain from VASP calculations:
 strain-scan --plot --output-dir vasp_runs
 ```
 
-This reads `vasprun.xml` files in subdirectories (named with the prefix, e.g., POSCAR_strain_001, etc.) and generates `energy_vs_strain.png`.
+This reads `vasprun.xml` files in subdirectories (named with the prefix, e.g., POSCAR_strain_001, etc.), generates `energy_vs_strain.png`, and performs a quadratic fit to find the optimal strain with minimum energy.
 
 ## Output
 
@@ -88,6 +88,7 @@ Each file includes the strain value in the comment line.
 - numpy
 - py4vasp
 - matplotlib
+- scipy
 
 ## License
 

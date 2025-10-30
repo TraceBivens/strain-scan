@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 import py4vasp as p4v
 import matplotlib.pyplot as plt
+from scipy.optimize import minimize_scalar
 
 
 def parse_poscar(filepath):
@@ -325,6 +326,26 @@ Examples:
         if valid_strains:
             plt.figure(figsize=(8, 6))
             plt.plot(valid_strains, energies, 'o-', label='Potential Energy')
+
+            # Fit quadratic and find minimum
+            if len(valid_strains) >= 3:
+                coeffs = np.polyfit(valid_strains, energies, 2)
+                poly = np.poly1d(coeffs)
+                strain_fit = np.linspace(min(valid_strains), max(valid_strains), 100)
+                energy_fit = poly(strain_fit)
+                plt.plot(strain_fit, energy_fit, '--', label='Quadratic Fit')
+
+                # Find minimum: for ax^2 + bx + c, min at -b/(2a)
+                a, b, c = coeffs
+                if a > 0:
+                    optimal_strain = -b / (2 * a)
+                    optimal_energy = poly(optimal_strain)
+                    print(f"Optimal strain: {optimal_strain:.6f}")
+                    print(f"Optimal energy: {optimal_energy:.6f} eV")
+                    plt.plot(optimal_strain, optimal_energy, 'rx', markersize=10, label='Minimum')
+                else:
+                    print("Warning: Quadratic fit is not convex; no minimum found")
+
             plt.xlabel('Strain')
             plt.ylabel('Energy (eV)')
             plt.title('Energy vs Strain')

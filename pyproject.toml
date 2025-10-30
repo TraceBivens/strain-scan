@@ -60,6 +60,7 @@ setuptools = "*"
 numpy = "*"
 py4vasp = "*"
 matplotlib = "*"
+scipy = "*"
 
 
 
