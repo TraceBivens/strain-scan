@@ -52,16 +52,18 @@ def plot_energy_vs_strain(
         if vasprun_path.exists():
             try:
                 calc = p4v.Calculation.from_file(str(vasprun_path))
-                energy = calc.energy.to_numpy()  # final potential energy (TOTEN)
+                energy = calc.energy.to_numpy()  # total energy (TOTEN) for final step
                 energies.append(energy)
                 valid_strains.append(strain)
                 print(f"Read energy from {vasprun_path}: {energy:.6f} eV")
             except Exception as e:
                 print(f"Error reading {vasprun_path}: {e}")
+                print(f"  This may indicate incomplete VASP calculations or corrupted vasprun.xml")
                 energies.append(np.nan)
                 valid_strains.append(strain)
         else:
             print(f"Warning: {vasprun_path} not found")
+            print(f"  Expected VASP calculation results in subdirectory: {calc_dir / dir_name}")
             energies.append(np.nan)
             valid_strains.append(strain)
     
