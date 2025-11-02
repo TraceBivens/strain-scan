@@ -9,9 +9,9 @@ import argparse
 import sys
 from pathlib import Path
 import numpy as np
-import py4vasp as p4v
-import matplotlib.pyplot as plt
-from scipy.optimize import minimize_scalar
+from .plotting import plot_energy_vs_strain
+
+__all__ = ['parse_poscar', 'apply_strain', 'write_poscar', 'plot_energy_vs_strain', 'main']
 
 
 def parse_poscar(filepath):
@@ -294,69 +294,25 @@ Examples:
     if args.poscar_file and not args.poscar_file.exists():
         parser.error(f"POSCAR file '{args.poscar_file}' does not exist")
 
-    # Create output directory
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-
     if args.plot:
-        # Plotting mode
-        strains = np.linspace(args.min_strain, args.max_strain, args.steps)
-        energies = []
-        valid_strains = []
-
-        for i, strain in enumerate(strains):
-            dir_name = f"{args.prefix}{i+1:03d}"
-            vasprun_path = args.output_dir / dir_name / "vasprun.xml"
-            if vasprun_path.exists():
-                try:
-                    calc = p4v.Calculation.from_file(str(vasprun_path))
-                    energy = calc.energy.potential[-1]  # final potential energy
-                    energies.append(energy)
-                    valid_strains.append(strain)
-                    print(f"Read energy from {vasprun_path}: {energy:.6f} eV")
-                except Exception as e:
-                    print(f"Error reading {vasprun_path}: {e}")
-                    energies.append(np.nan)
-                    valid_strains.append(strain)
-            else:
-                print(f"Warning: {vasprun_path} not found")
-                energies.append(np.nan)
-                valid_strains.append(strain)
-
-        # Plot
-        if valid_strains:
-            plt.figure(figsize=(8, 6))
-            plt.plot(valid_strains, energies, 'o-', label='Potential Energy')
-
-            # Fit quadratic and find minimum
-            if len(valid_strains) >= 3:
-                coeffs = np.polyfit(valid_strains, energies, 2)
-                poly = np.poly1d(coeffs)
-                strain_fit = np.linspace(min(valid_strains), max(valid_strains), 100)
-                energy_fit = poly(strain_fit)
-                plt.plot(strain_fit, energy_fit, '--', label='Quadratic Fit')
-
-                # Find minimum: for ax^2 + bx + c, min at -b/(2a)
-                a, b, c = coeffs
-                if a > 0:
-                    optimal_strain = -b / (2 * a)
-                    optimal_energy = poly(optimal_strain)
-                    print(f"Optimal strain: {optimal_strain:.6f}")
-                    print(f"Optimal energy: {optimal_energy:.6f} eV")
-                    plt.plot(optimal_strain, optimal_energy, 'rx', markersize=10, label='Minimum')
-                else:
-                    print("Warning: Quadratic fit is not convex; no minimum found")
-
-            plt.xlabel('Strain')
-            plt.ylabel('Energy (eV)')
-            plt.title('Energy vs Strain')
-            plt.grid(True)
-            plt.legend()
-            plt.savefig(args.plot_file)
-            print(f"\nPlot saved to {args.plot_file}")
-        else:
-            print("No valid vasprun.xml files found for plotting")
+        # Plotting mode - use separate plotting function
+        result = plot_energy_vs_strain(
+            output_dir=args.output_dir,
+            min_strain=args.min_strain,
+            max_strain=args.max_strain,
+            steps=args.steps,
+            prefix=args.prefix,
+            plot_file=args.plot_file
+        )
+        
+        if result is None:
+            print("No valid data found for plotting")
+            sys.exit(1)
     else:
         # Generation mode
+        # Create output directory
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        
         # Parse input POSCAR
         structure = parse_poscar(args.poscar_file)
 
