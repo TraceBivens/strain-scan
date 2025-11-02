@@ -214,6 +214,8 @@ def main():
 Examples:
   %(prog)s POSCAR --min-strain -0.05 --max-strain 0.05 --steps 11
   %(prog)s POSCAR --strain-type biaxial --output-dir strained_2d
+  %(prog)s --plot --calc-dir /path/to/vasp/calculations
+  %(prog)s --plot --calc-dir calculations --output-dir strained
         """
     )
 
@@ -260,6 +262,12 @@ Examples:
     )
 
     parser.add_argument(
+        "--calc-dir",
+        type=Path,
+        help="Directory containing VASP calculation subdirectories (default: --output-dir)"
+    )
+
+    parser.add_argument(
         "--prefix",
         type=str,
         default="POSCAR_strain_",
@@ -296,8 +304,9 @@ Examples:
 
     if args.plot:
         # Plotting mode - use separate plotting function
+        calc_dir = args.calc_dir if args.calc_dir else args.output_dir
         result = plot_energy_vs_strain(
-            output_dir=args.output_dir,
+            calc_dir=calc_dir,
             min_strain=args.min_strain,
             max_strain=args.max_strain,
             steps=args.steps,

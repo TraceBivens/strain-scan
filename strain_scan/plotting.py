@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def plot_energy_vs_strain(
-    output_dir,
+    calc_dir,
     min_strain=-0.05,
     max_strain=0.05,
     steps=11,
@@ -24,7 +24,7 @@ def plot_energy_vs_strain(
     Plot energy vs strain from VASP calculations in subdirectories.
     
     Args:
-        output_dir (Path): Directory containing VASP calculation subdirectories
+        calc_dir (Path): Directory containing VASP calculation subdirectories
         min_strain (float): Minimum strain value (default: -0.05)
         max_strain (float): Maximum strain value (default: 0.05)
         steps (int): Number of strain steps (default: 11)
@@ -34,7 +34,7 @@ def plot_energy_vs_strain(
     Returns:
         tuple: (valid_strains, energies, optimal_strain, optimal_energy) or None if no data
     """
-    output_dir = Path(output_dir)
+    calc_dir = Path(calc_dir)
     plot_file = Path(plot_file)
     
     # Generate strain values
@@ -42,12 +42,12 @@ def plot_energy_vs_strain(
     energies = []
     valid_strains = []
     
-    print(f"Looking for VASP results in: {output_dir}")
+    print(f"Looking for VASP results in: {calc_dir}")
     
     # Read energies from vasprun.xml files
     for i, strain in enumerate(strains):
         dir_name = f"{prefix}{i+1:03d}"
-        vasprun_path = output_dir / dir_name / "vasprun.xml"
+        vasprun_path = calc_dir / dir_name / "vasprun.xml"
         
         if vasprun_path.exists():
             try:
