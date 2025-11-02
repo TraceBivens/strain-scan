@@ -52,7 +52,7 @@ def plot_energy_vs_strain(
         if vasprun_path.exists():
             try:
                 calc = p4v.Calculation.from_file(str(vasprun_path))
-                energy = calc.energy.potential[-1]  # final potential energy
+                energy = calc.energy.to_numpy()  # final potential energy (TOTEN)
                 energies.append(energy)
                 valid_strains.append(strain)
                 print(f"Read energy from {vasprun_path}: {energy:.6f} eV")
