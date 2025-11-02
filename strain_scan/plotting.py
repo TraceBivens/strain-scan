@@ -49,21 +49,35 @@ def plot_energy_vs_strain(
         dir_name = f"{prefix}{i+1:03d}"
         vasprun_path = calc_dir / dir_name / "vasprun.xml"
         
-        if vasprun_path.exists():
+        # Try vaspout.h5 first (modern py4vasp), then vasprun.xml (legacy)
+        vaspout_path = calc_dir / dir_name / "vaspout.h5"
+        vasprun_path = calc_dir / dir_name / "vasprun.xml"
+        
+        calc_path = None
+        if vaspout_path.exists():
+            calc_path = vaspout_path
+            file_type = "vaspout.h5"
+        elif vasprun_path.exists():
+            calc_path = vasprun_path
+            file_type = "vasprun.xml"
+        
+        if calc_path:
             try:
-                calc = p4v.Calculation.from_file(str(vasprun_path))
+                calc = p4v.Calculation.from_path(str(calc_path.parent))
                 energy = calc.energy.to_numpy()  # total energy (TOTEN) for final step
                 energies.append(energy)
                 valid_strains.append(strain)
-                print(f"Read energy from {vasprun_path}: {energy:.6f} eV")
+                print(f"Read energy from {calc_path} ({file_type}): {energy:.6f} eV")
             except Exception as e:
-                print(f"Error reading {vasprun_path}: {e}")
-                print(f"  This may indicate incomplete VASP calculations or corrupted vasprun.xml")
+                print(f"Error reading {calc_path}: {e}")
+                if file_type == "vasprun.xml":
+                    print(f"  Note: Modern py4vasp prefers vaspout.h5 files")
+                    print(f"  Consider recompiling VASP with -DVASP_HDF5 support")
                 energies.append(np.nan)
                 valid_strains.append(strain)
         else:
-            print(f"Warning: {vasprun_path} not found")
-            print(f"  Expected VASP calculation results in subdirectory: {calc_dir / dir_name}")
+            print(f"Warning: No VASP output files found in {calc_dir / dir_name}")
+            print(f"  Expected either vaspout.h5 (modern) or vasprun.xml (legacy)")
             energies.append(np.nan)
             valid_strains.append(strain)
     
