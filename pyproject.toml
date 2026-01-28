@@ -51,7 +51,7 @@ channels = ["https://prefix.dev/pixi-build-backends", "conda-forge"]
 [tool.pixi.package]
 name = "strain-scan"
 version = "0.1.0"
-build = {backend = {name = "pixi-build-python", version = "==0.4.0"}}
+build = {backend = {name = "pixi-build-python", version = "*"}}
 
 [tool.pixi.package.host-dependencies]
 setuptools = "*"
